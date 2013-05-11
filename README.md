@@ -4,7 +4,7 @@ A Hubot script for controlling Minecraft servers over RCON.
 
 # Installation
 
-1. Install this module:
+1. Install this module into an existing Hubot:
 
     % npm i -S hubot-mcrcon
 
