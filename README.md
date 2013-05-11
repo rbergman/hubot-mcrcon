@@ -23,7 +23,7 @@ start up:
     # minecraft host or ip
     % export HUBOT_MCRCON_HOST=minecraft.example.com
     # minecraft rcon port
-    % export HUBOT_MCRCON_PORT=25565
+    % export HUBOT_MCRCON_PORT=25575
     # minecraft rcon password
     % export HUBOT_MCRCON_PASS=********
     # mention_name of a user allowed to execute minecraft op commands
