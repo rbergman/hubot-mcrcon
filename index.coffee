@@ -23,12 +23,13 @@ module.exports = (robot) ->
 
 configure = (robot) ->
 
-  robot.respond /mc\s+(.*)/i, (msg) ->
+  robot.respond /mc\s+(\w+)(?:\s+(.+))?/i, (msg) ->
     user = msg.message.user.mention_name
     cmd = msg.match[1]
+    args = msg.match[2]
     if isAdmin(user) or cmd in cmds
       robot.logger.debug "MC RCON: request '#{cmd}' by '#{user}'"
-      exec cmd, (err, result) ->
+      exec format(user, cmd, args), (err, result) ->
         return msg.send String(err) if err
         robot.logger.debug "MC RCON: result '#{result}' for '#{cmd}' by '#{user}'"
         msg.send result
@@ -38,6 +39,11 @@ configure = (robot) ->
 
 isAdmin = (user) ->
   user is opts.boss
+
+format = (user, cmd, args) ->
+  switch cmd
+    when "say" then "#{cmd} [#{user}] #{args}"
+    else "#{cmd}#{if args then ' ' + args else ''}"
 
 exec = (cmd, callback) ->
   timeout = new Timeout 2000, ->
