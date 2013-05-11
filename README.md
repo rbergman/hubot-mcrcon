@@ -28,3 +28,9 @@ start up:
     % export HUBOT_MCRCON_PASS=********
     # mention_name of a user allowed to execute minecraft op commands
     % export HUBOT_MCRCON_BOSS=FooBar
+
+# TODO
+
+* Support multiple Minecraft servers per Hubot
+* Map XMPP usernames to Minecraft usernames for 'say'
+* Grant XMPP users op command privileges
