@@ -57,7 +57,7 @@ exec = (cmd, callback) ->
     rcon.setTimeout 2000
     rcon.send cmd
   rcon.on "response", (str) ->
-    callback null, sanitize(str)
+    callback null, (sanitize(str) or "As you wish.")
     rcon.disconnect()
   rcon.on "error", (err) ->
     callback err
