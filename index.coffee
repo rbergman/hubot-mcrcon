@@ -6,6 +6,7 @@
 
 {object, keys} = require "underscore"
 Rcon = require "rcon"
+{inspect} = require "util"
 
 params = ["host", "port", "pass", "boss"]
 opts = do ->
@@ -19,7 +20,7 @@ module.exports = (robot) ->
   if keys(opts).length is params.length
     configure robot
   else
-    robot.logger.warning "MC RCON: Invalid settings: #{JSON.stringify opts}"
+    robot.logger.warning "MC RCON: Invalid settings: #{inspect opts}"
 
 configure = (robot) ->
 
