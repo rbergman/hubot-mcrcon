@@ -144,16 +144,17 @@ configure = (robot) ->
       res.reply "You are #{player} on the server #{server}."
 
     add: (res, user, args, server, servers) ->
-      return res.reply "You are not authorized to add servers." if user.name isnt opts.admin
+      if user.name isnt opts.admin
+        return res.reply "You are not authorized to add servers."
       # @todo can we enforce direct messaging?
       if args.length isnt 2
         return res.reply "You must specify <host:port> <password>. Use a private room!"
       [host, port] = args[0].split(":")
       return res.reply "You must specify a host." if not host
       port or= "25575"
-      password = args[1]
-      return res.reply "You must specify a password. Use a private room!" if not port
-      servers[server] = {host, port, password: crypto.encrypt password}
+      password = crypto.encrypt args[1]
+      return res.reply "You must specify a password. Use a private room!" if not password
+      servers[server] = {host, port, password}
       res.reply "Ok, I will remember that server."
 
     drop: (res, user, args, server, servers) ->
