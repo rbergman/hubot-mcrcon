@@ -4,15 +4,11 @@
 # Commands:
 #   mc help
 
-# TODO
-#   - replace admin with owners per server (whoever added it)
-#   - ops can add ops to their server?
-
 {object, keys} = require "underscore"
 Rcon = require "rcon"
 {inspect} = require "util"
 
-params = ["admin", "timeout", "secret"]
+params = ["timeout", "secret"]
 opts = object do ->
   getopt = (k) -> process.env["HUBOT_MCRCON_#{k.toUpperCase()}"]
   [k, v] for k in params when (v = getopt k) and v
@@ -52,8 +48,7 @@ configure = (robot) ->
     return cmds.servers res, servers if first is "servers"
     server = first
     subcmd = match[2]
-    return if not subcmd?
-    subcmd = subcmd.slice 1 if subcmd.charAt(0) is "/"
+    subcmd = subcmd.slice 1 if subcmd?.charAt(0) is "/"
     if not servers[server] and not (subcmd in ["add", "drop"])
       return res.reply "I don't know of a Minecraft server named #{first}."
     return cmds.list res, user, args, server, servers if not subcmd?
@@ -88,20 +83,20 @@ configure = (robot) ->
 
     help: (res, header) ->
       msg = """
-        command                             who?    description 
-        ----------------------------------- ------- --------------------------------
-        mc help                             all     display this message
-        mc servers                          all     lists known servers
-        mc <server>                         all     lists logged in players
-        mc <server> say                     all     broadcasts an in-game message
-        mc <server> i am <player>           all     sets your Minecraft player name
-        mc <server> who am i                all     echos your Minecraft player name
-        mc <server> add <host[:port]> <pw>  admin   add a Minecraft RCON server
-        mc <server> drop                    admin   drop a server
-        mc <server> + <chat user>           admin   ops a chat user
-        mc <server> - <chat user>           admin   deops a chat user
-        mc <server> ops                     all     lists chat user ops
-        mc <server> <remote command>        op      executes remote command
+        command                             who?      description 
+        ----------------------------------- --------- --------------------------------
+        mc help                             all       display this message
+        mc servers                          all       lists known servers
+        mc <server>                         all       lists logged in players
+        mc <server> say                     all       broadcasts an in-game message
+        mc <server> i am <player>           all       sets your Minecraft player name
+        mc <server> who am i                all       echos your Minecraft player name
+        mc <server> add <host[:port]> <pw>  all       add a Minecraft RCON server
+        mc <server> drop                    owner     drop a server
+        mc <server> + <chat user>           op|owner  ops a chat user
+        mc <server> - <chat user>           op|owner  deops a chat user
+        mc <server> ops                     all       lists chat user ops
+        mc <server> <remote command>        op|owner  executes remote command
       """
       res.send (if header then header + "\n" else "") + msg
 
@@ -109,7 +104,7 @@ configure = (robot) ->
       list = Object.keys(servers)
         .map (name) ->
           server = servers[name]
-          "#{name} @ #{server.host}:#{server.port}"
+          "#{name} @ #{server.host}:#{server.port} (#{server.owner})"
         .sort().join "\n"
       if list.length is 0
         return res.send "I don't know any Minecraft servers."
@@ -144,8 +139,6 @@ configure = (robot) ->
       res.reply "You are #{player} on the server #{server}."
 
     add: (res, user, args, server, servers) ->
-      if user.name isnt opts.admin
-        return res.reply "You are not authorized to add servers."
       # @todo can we enforce direct messaging?
       if args.length isnt 2
         return res.reply "You must specify <host:port> <password>. Use a private room!"
@@ -154,41 +147,44 @@ configure = (robot) ->
       port or= "25575"
       password = crypto.encrypt args[1]
       return res.reply "You must specify a password. Use a private room!" if not password
-      servers[server] = {host, port, password}
+      servers[server] = {owner: user.name, host, port, password}
       res.reply "Ok, I will remember that server."
 
     drop: (res, user, args, server, servers) ->
-      if user.name isnt opts.admin
-        return res.reply "You are not authorized to drop servers."
-      if not servers[server]
+      s = servers[server]
+      if user.name isnt s.owner
+        return res.reply "Only the server owner can drop it."
+      if not s
         return res.reply "I can't forget what I don't know!"
       delete servers[server]
       res.reply "Ok, I forgot the server #{server}."
 
     op: (res, user, args, server, servers) ->
-      if user.name isnt opts.admin
+      s = servers[server]
+      if user.name isnt s.owner and not (user.name in s.ops)
         return res.reply "You are not authorized to op chat users."
       if args.length is 0
         return res.reply "You must specify a chat user to op."
       userToken = args.join " "
       targetUser = userForToken userToken, res
       return if not targetUser
-      ops = servers[server].ops ?= []
+      ops = s.ops ?= []
       if not (targetUser.name in ops) then ops.push targetUser.name
       res.send "Ok, #{targetUser.name} is an op on the server #{server}."
 
     deop: (res, user, args, server, servers) ->
-      if user.name isnt opts.admin
+      s = servers[server]
+      if user.name isnt s.owner and not (user.name in s.ops)
         return res.reply "You are not authorized to deop chat users."
       if args.length is 0
         return res.reply "You must specify a chat user to deop."
       userToken = args.join " "
       targetUser = userForToken userToken, res
       return if not targetUser
-      ops = servers[server].ops ?= []
+      ops = s.ops ?= []
       if not (targetUser.name in ops)
         return res.send "I can't find the op #{targetUser.name} listed for the server #{server}."
-      servers[server].ops = (op for op in ops when op isnt targetUser.name)
+      s.ops = (op for op in ops when op isnt targetUser.name)
       res.send "Ok, #{targetUser.name} is no longer an op on the server #{server}."
 
     ops: (res, user, args, server, servers) ->
@@ -198,7 +194,8 @@ configure = (robot) ->
       res.send "The server #{server} has the following chat user ops:\n#{ops.join '\n'}"
 
     exec: (res, user, args, server, servers) ->
-      if user.name isnt opts.admin
+      s = servers[server]
+      if user.name isnt s.owner and not (user.name in s.ops)
         return res.reply "You are not authorized to execute remote commands on the server #{server}."
       exec servers[server], args.join(" "), (err, result) ->
         return res.reply String(err) if err
