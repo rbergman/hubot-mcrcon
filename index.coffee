@@ -5,19 +5,20 @@
 #   mc help
 
 # TODO
-#   - ops can add ops to their server
-#   - fix server help line breaking
-#   - allow leading / in remote commands (strip it when present)
+#   - line breaks in help
+#   - /help not working right
+#   - replace admin with owners per server (whoever added it)
+#   - ops can add ops to their server?
 
 {object, keys} = require "underscore"
 Rcon = require "rcon"
 {inspect} = require "util"
 
 params = ["admin", "timeout", "secret"]
-opts = do ->
-  getopt = (opt) -> process.env["HUBOT_MCRCON_#{opt.toUpperCase()}"]
-  object ([opt, getopt opt] for opt in params)
-opts.timeout = if opts.timeout? then parseInt opts.timeout, 10 else 3000
+opts = object do ->
+  getopt = (k) -> process.env["HUBOT_MCRCON_#{k.toUpperCase()}"]
+  [k, v] for k in params when (v = getopt k) and v
+opts.timeout = if opts.timeout then parseInt opts.timeout, 10 else 3000
 
 class Crypto
   crypto = require "crypto"
