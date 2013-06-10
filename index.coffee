@@ -5,8 +5,6 @@
 #   mc help
 
 # TODO
-#   - line breaks in help
-#   - /help not working right
 #   - replace admin with owners per server (whoever added it)
 #   - ops can add ops to their server?
 
@@ -44,7 +42,7 @@ module.exports = (robot) ->
 
 configure = (robot) ->
 
-  robot.hear /^\s*mc\s+(help|servers|\w+)(?:\s+(list|say|i\s+am|who\s+am\s+i|add|drop|\+|-|ops|\w+)(?:\s+(.*))?)?/i, (res) ->
+  robot.hear /^\s*mc\s+(help|servers|\w+)(?:\s+(list|say|i\s+am|who\s+am\s+i|add|drop|\+|-|ops|\/?\w+)(?:\s+(.*))?)?/i, (res) ->
     user = res.message.user
     match = res.match
     first = match[1]
@@ -54,6 +52,8 @@ configure = (robot) ->
     return cmds.servers res, servers if first is "servers"
     server = first
     subcmd = match[2]
+    return if not subcmd?
+    subcmd = subcmd.slice 1 if subcmd.charAt(0) is "/"
     if not servers[server] and not (subcmd in ["add", "drop"])
       return res.reply "I don't know of a Minecraft server named #{first}."
     return cmds.list res, user, args, server, servers if not subcmd?
