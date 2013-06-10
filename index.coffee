@@ -203,7 +203,7 @@ configure = (robot) ->
         return res.reply String(err) if err
         # @todo better organization here; combine with list
         if args[0] is "help"
-          result = result.replace /([^\(])(\/\w+)/g, ($0, $1, $2) -> $1 + "\n" + $2
+          result = result.replace /\/\w+( <)?/g, ($0) -> if $0 isnt "/help <" then "\n" + $0 else $0
         res.send result
 
 exec = (server, cmd, callback) ->
