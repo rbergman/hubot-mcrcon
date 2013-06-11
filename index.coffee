@@ -2,7 +2,8 @@
 #   Executes Minecraft commands over RCON
 #
 # Dependencies:
-#   None
+#   "underscore": "~1.4.4",
+#   "rcon": "~0.1.5"
 #
 # Configuration:
 #   HUBOT_MCRCON_SECRET - A secret used to encrypt RCON passwords
@@ -113,7 +114,7 @@ configure = (robot) ->
       res.send (if header then header + "\n" else "") + msg
 
     servers: (res, servers) ->
-      list = Object.keys(servers)
+      list = keys(servers)
         .map (name) ->
           server = servers[name]
           "#{name} @ #{server.host}:#{server.port} (#{server.owner})"
