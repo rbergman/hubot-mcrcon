@@ -101,6 +101,7 @@ configure = (robot) ->
         mc help                             all       display this message
         mc servers                          all       lists known servers
         mc <server>                         all       lists logged in players
+        mc <server> list                    all       lists logged in players
         mc <server> say                     all       broadcasts an in-game message
         mc <server> i am <player>           all       sets your Minecraft player name
         mc <server> who am i                all       echos your Minecraft player name
