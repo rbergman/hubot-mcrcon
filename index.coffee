@@ -1,8 +1,20 @@
 # Description:
-#   Executes Minecraft commands over RCON.
+#   Executes Minecraft commands over RCON
+#
+# Dependencies:
+#   None
+#
+# Configuration:
+#   HUBOT_MCRCON_SECRET - A secret used to encrypt RCON passwords
 #
 # Commands:
 #   mc help
+#
+# Notes:
+#   None
+#
+# Author:
+#   rbergman
 
 {object, keys} = require "underscore"
 Rcon = require "rcon"
