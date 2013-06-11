@@ -1,6 +1,6 @@
 {
   "name": "hubot-mcrcon",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "description": "A Minecraft RCON script for Hubot",
   "main": "index.js",
   "scripts": {
