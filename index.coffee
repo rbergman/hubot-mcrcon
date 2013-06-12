@@ -9,7 +9,8 @@
 #   HUBOT_MCRCON_SECRET - A secret used to encrypt RCON passwords
 #
 # Commands:
-#   mc help
+#   minecraft help - shows detailed help for the minecraft command
+#   mc help - shows detailed help for the minecraft command
 #
 # Notes:
 #   None
