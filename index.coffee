@@ -51,7 +51,16 @@ module.exports = (robot) ->
 
 configure = (robot) ->
 
-  robot.hear /^\s*mc\s+(help|servers|\w+)(?:\s+(list|say|i\s+am|who\s+am\s+i|add|drop|\+|-|ops|\/?\w+)(?:\s+(.*))?)?/i, (res) ->
+  re = ///
+    (?:minecraft|mc)\s+
+    (help|servers|\w+)
+    (?:\s+
+      (list|say|i\s+am|who\s+am\s+i|add|drop|\+|-|ops|/?\w+)
+      (?:\s+(.*))?
+    )?
+  ///i
+
+  robot.hear re, (res) ->
     user = res.message.user
     match = res.match
     first = match[1]
@@ -62,11 +71,11 @@ configure = (robot) ->
     server = first
     subcmd = match[2]
     subcmd = subcmd.slice 1 if subcmd?.charAt(0) is "/"
-    if not servers[server] and not (subcmd in ["add", "drop"])
-      return res.reply "I don't know of a Minecraft server named #{first}."
-    return cmds.list res, user, args, server, servers if not subcmd?
+    subcmd = "list" if not subcmd?
     subcmd = subcmd.toLowerCase()
     subcmd = {"i am": "set", "who am i": "get", "+": "op", "-": "deop"}[subcmd] or subcmd
+    if not servers[server] and not (subcmd in ["add", "drop"])
+      return res.reply "I don't know anything about a Minecraft server named #{first}."
     args = match[3]?.split(/\s+/) or []
     return cmds[subcmd] res, user, args, server, servers if cmds[subcmd] and not (subcmd in ["help", "servers"])
     cmds.exec res, user, [subcmd].concat(args), server, servers
@@ -166,10 +175,10 @@ configure = (robot) ->
 
     drop: (res, user, args, server, servers) ->
       s = servers[server]
+      if not s
+        return res.reply "I don't know anything about a Minecraft server named #{server}."
       if user.name isnt s.owner
         return res.reply "Only the server owner can drop it."
-      if not s
-        return res.reply "I can't forget what I don't know!"
       delete servers[server]
       res.reply "Ok, I forgot the server #{server}."
 
