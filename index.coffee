@@ -20,6 +20,7 @@
 
 {object, keys} = require "underscore"
 Rcon = require "rcon"
+URL = require "url-parse"
 {inspect} = require "util"
 
 params = ["timeout", "secret"]
@@ -166,7 +167,9 @@ configure = (robot) ->
       # @todo can we enforce direct messaging?
       if args.length isnt 2
         return res.reply "You must specify <host:port> <password>. Use a private room!"
-      [host, port] = args[0].split(":")
+      url = new URL args[0]
+      host = url.hostname
+      port = url.port
       return res.reply "You must specify a host." if not host
       port or= "25575"
       password = crypto.encrypt args[1]
