@@ -15,7 +15,8 @@
   "author": "Robert Bergman",
   "license": "MIT",
   "dependencies": {
+    "rcon": "~0.1.5",
     "underscore": "~1.4.4",
-    "rcon": "~0.1.5"
+    "url-parse": "^1.0.5"
   }
 }
